@@ -49,25 +49,25 @@ document.getElementById('leftBtn').addEventListener('touchend', () => keys['Arro
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
 // Fire Button with cooldown logic (0.7 seconds)
-document.getElementById('fireBtn').addEventListener('click', () => fireRocket());
+let fireCooldown = 700; // 0.7 seconds cooldown time
+let lastFireTimestamp = 0; // Time when fire button was last tapped
+
+document.getElementById('fireBtn').addEventListener('click', () => handleFire());
 document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent the default mobile behavior (text selection)
-    fireRocket();
+    handleFire();
 });
 
-let isFiring = false;
-
-function fireRocket() {
-    const now = Date.now();
-    if (!isFiring && now - lastFireTime >= 700) {  // 700ms cooldown before firing again
-        isFiring = true;
+function handleFire() {
+    const currentTimestamp = Date.now();
+    if (currentTimestamp - lastFireTimestamp >= fireCooldown) { // Check cooldown
+        // Fire the rocket
         keys[' '] = true;
-        lastFireTime = now;
+        lastFireTimestamp = currentTimestamp; // Update the timestamp when fire happens
 
-        // Disable firing after 100ms (simulate a single shot)
+        // Disable the fire after 100ms to simulate a shot
         setTimeout(() => {
             keys[' '] = false;
-            isFiring = false;  // Allow firing again after cooldown
         }, 100);
     }
 }
@@ -129,9 +129,9 @@ function gameLoop(timestamp) {
     });
 
     // Fire Bullets with a cooldown of 0.7 seconds
-    if (keys[' '] && timestamp - lastFireTime > 700) { // 700ms cooldown
+    if (keys[' '] && timestamp - lastFireTimestamp >= fireCooldown) { // 0.7 seconds cooldown
         bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        lastFireTime = timestamp;
+        lastFireTimestamp = timestamp;
     }
 
     // Move Bullets
