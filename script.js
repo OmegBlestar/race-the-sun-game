@@ -60,10 +60,23 @@ document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
 
 function handleFire() {
     const currentTimestamp = Date.now();
-    if (currentTimestamp - lastFireTimestamp >= fireCooldown) { // Check cooldown
+    const fireButton = document.getElementById('fireBtn');
+
+    // Check if cooldown has passed
+    if (currentTimestamp - lastFireTimestamp >= fireCooldown) {
         // Fire the rocket
         keys[' '] = true;
         lastFireTimestamp = currentTimestamp; // Update the timestamp when fire happens
+
+        // Disable the fire button and fade it
+        fireButton.disabled = true;
+        fireButton.style.opacity = '0.5'; // Fade out button
+
+        // Enable the fire button and reset opacity after 0.7 seconds
+        setTimeout(() => {
+            fireButton.disabled = false;
+            fireButton.style.opacity = '1'; // Restore opacity
+        }, fireCooldown);
 
         // Disable the fire after 100ms to simulate a shot
         setTimeout(() => {
