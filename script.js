@@ -21,7 +21,6 @@ let bullets = [];
 let score = 0;
 let highScore = 0;
 let difficulty = 1; // Increases as score rises
-let lastFireTimestamp = 0; // Tracks when the last bullet was fired
 
 // Controls
 let keys = {
@@ -48,37 +47,11 @@ document.getElementById('rightBtn').addEventListener('touchstart', () => keys['A
 document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
-// Fire Button with cooldown logic (0.7 seconds)
-let fireCooldown = 700; // 0.7 seconds cooldown time
-let lastFireTimestamp = 0; // Time when fire button was last tapped
-
-document.getElementById('fireBtn').addEventListener('click', () => handleFire());
-document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent the default mobile behavior (text selection)
-    handleFire();
+// Fire Button without delay or fading
+document.getElementById('fireBtn').addEventListener('click', () => {
+    // Fire the rocket
+    bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
 });
-
-function handleFire() {
-    const currentTimestamp = Date.now();
-    const fireButton = document.getElementById('fireBtn');
-
-    // Check if cooldown has passed
-    if (currentTimestamp - lastFireTimestamp >= fireCooldown) {
-        // Fire the rocket
-        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        lastFireTimestamp = currentTimestamp; // Update the timestamp when fire happens
-
-        // Disable the fire button and fade it
-        fireButton.disabled = true;
-        fireButton.style.opacity = '0.5'; // Fade out button
-
-        // Enable the fire button and reset opacity after 0.7 seconds
-        setTimeout(() => {
-            fireButton.disabled = false;
-            fireButton.style.opacity = '1'; // Restore opacity
-        }, fireCooldown);
-    }
-}
 
 // Game Loop
 function gameLoop(timestamp) {
