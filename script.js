@@ -48,11 +48,12 @@ document.getElementById('rightBtn').addEventListener('touchstart', () => keys['A
 document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
-// Fire Button
-document.getElementById('fireBtn').addEventListener('click', () => keys[' '] = true);
-document.getElementById('fireBtn').addEventListener('mouseup', () => keys[' '] = false);
-document.getElementById('fireBtn').addEventListener('touchstart', () => keys[' '] = true);
-document.getElementById('fireBtn').addEventListener('touchend', () => keys[' '] = false);
+// Fire Button - Single Fire on Tap
+document.getElementById('fireBtn').addEventListener('click', () => {
+    if (rocket.alive) { // Fire only if rocket is alive
+        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+    }
+});
 
 // Game Loop
 function gameLoop(timestamp) {
@@ -109,12 +110,6 @@ function gameLoop(timestamp) {
         ctx.fillStyle = "blue";
         ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
-
-    // Fire Bullets with a cooldown of 0.6 seconds
-    if (keys[' '] && timestamp - lastFireTime > 600) { // 600ms cooldown
-        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        lastFireTime = timestamp;
-    }
 
     // Move Bullets
     bullets.forEach((bullet, bulletIndex) => {
