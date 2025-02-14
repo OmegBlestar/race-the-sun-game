@@ -21,7 +21,7 @@ let bullets = [];
 let score = 0;
 let highScore = 0;
 let difficulty = 1; // Increases as score rises
-let lastFireTime = 0; // Tracks when the last bullet was fired
+let lastFireTimestamp = 0; // Tracks when the last bullet was fired
 
 // Controls
 let keys = {
@@ -65,7 +65,7 @@ function handleFire() {
     // Check if cooldown has passed
     if (currentTimestamp - lastFireTimestamp >= fireCooldown) {
         // Fire the rocket
-        keys[' '] = true;
+        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
         lastFireTimestamp = currentTimestamp; // Update the timestamp when fire happens
 
         // Disable the fire button and fade it
@@ -77,11 +77,6 @@ function handleFire() {
             fireButton.disabled = false;
             fireButton.style.opacity = '1'; // Restore opacity
         }, fireCooldown);
-
-        // Disable the fire after 100ms to simulate a shot
-        setTimeout(() => {
-            keys[' '] = false;
-        }, 100);
     }
 }
 
@@ -140,12 +135,6 @@ function gameLoop(timestamp) {
         ctx.fillStyle = "blue";
         ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
-
-    // Fire Bullets with a cooldown of 0.7 seconds
-    if (keys[' '] && timestamp - lastFireTimestamp >= fireCooldown) { // 0.7 seconds cooldown
-        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        lastFireTimestamp = timestamp;
-    }
 
     // Move Bullets
     bullets.forEach((bullet, bulletIndex) => {
