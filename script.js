@@ -47,8 +47,15 @@ document.getElementById('rightBtn').addEventListener('touchstart', () => keys['A
 document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
-// Fire Button without delay or fading
+// Fire Button for Phone (click and touch events)
 document.getElementById('fireBtn').addEventListener('click', () => {
+    // Fire the rocket
+    bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+});
+
+// For Mobile (Touch Event for Fire Button)
+document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent touch events from selecting text on phone
     // Fire the rocket
     bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
 });
