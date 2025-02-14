@@ -12,6 +12,12 @@ body {
     height: 100vh;
     background-color: black;
     overflow: hidden;
+
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 canvas {
@@ -44,4 +50,12 @@ button:active {
     color: white;
     margin-top: 10px;
     font-size: 20px;
+}
+
+/* Prevent text selection during gameplay */
+.controls, button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
