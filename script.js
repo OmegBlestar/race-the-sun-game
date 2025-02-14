@@ -48,29 +48,29 @@ document.getElementById('rightBtn').addEventListener('touchstart', () => keys['A
 document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
-// Fire Button
-document.getElementById('fireBtn').addEventListener('click', () => {
+// Fire Button with cooldown logic (0.7 seconds)
+document.getElementById('fireBtn').addEventListener('click', () => fireRocket());
+document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent the default mobile behavior (text selection)
+    fireRocket();
+});
+
+let isFiring = false;
+
+function fireRocket() {
     const now = Date.now();
-    if (now - lastFireTime >= 700) {  // 700ms cooldown before firing again
+    if (!isFiring && now - lastFireTime >= 700) {  // 700ms cooldown before firing again
+        isFiring = true;
         keys[' '] = true;
         lastFireTime = now;
-        setTimeout(() => { keys[' '] = false; }, 100); // Disable firing after 100ms (to simulate single shot)
+
+        // Disable firing after 100ms (simulate a single shot)
+        setTimeout(() => {
+            keys[' '] = false;
+            isFiring = false;  // Allow firing again after cooldown
+        }, 100);
     }
-});
-document.getElementById('fireBtn').addEventListener('mouseup', () => {
-    keys[' '] = false;
-});
-document.getElementById('fireBtn').addEventListener('touchstart', () => {
-    const now = Date.now();
-    if (now - lastFireTime >= 700) {
-        keys[' '] = true;
-        lastFireTime = now;
-        setTimeout(() => { keys[' '] = false; }, 100); // Disable firing after 100ms (to simulate single shot)
-    }
-});
-document.getElementById('fireBtn').addEventListener('touchend', () => {
-    keys[' '] = false;
-});
+}
 
 // Game Loop
 function gameLoop(timestamp) {
