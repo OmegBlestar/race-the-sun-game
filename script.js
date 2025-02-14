@@ -21,6 +21,7 @@ let bullets = [];
 let score = 0;
 let highScore = 0;
 let difficulty = 1; // Increases as score rises
+let lastFireTime = 0; // Tracks when the last bullet was fired
 
 // Controls
 let keys = {
@@ -47,30 +48,41 @@ document.getElementById('rightBtn').addEventListener('touchstart', () => keys['A
 document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
-// Fire Button for Phone (click and touch events)
+// Fire Button - Single Fire on Tap
+let isFiring = false; // Flag to check if firing is in progress
+
 document.getElementById('fireBtn').addEventListener('click', () => {
-    // Fire the rocket
-    bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
+        isFiring = true; // Set firing flag
+        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
+    }
 });
 
-// For Mobile (Touch Event for Fire Button)
-document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
-    e.preventDefault(); // Prevent touch events from selecting text on phone
-    // Fire the rocket
-    bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+// Mobile Fire Button - Single Fire on Tap
+document.getElementById('fireBtn').addEventListener('touchstart', () => {
+    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
+        isFiring = true; // Set firing flag
+        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
+    }
+});
+
+document.getElementById('fireBtn').addEventListener('touchend', () => {
+    isFiring = false; // Reset firing flag when touch ends
 });
 
 // Game Loop
 function gameLoop(timestamp) {
     if (!rocket.alive) return;
-
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Rocket Movement
     if (keys['ArrowLeft'] && rocket.x > 0) rocket.x -= rocket.speed;
     if (keys['ArrowRight'] && rocket.x + rocket.width < canvas.width) rocket.x += rocket.speed;
-    if (keys['ArrowUp']) rocket.angle = -15;
-    if (keys['ArrowDown']) rocket.angle = 15;
+    if (keys['ArrowUp']) rocket.angle = -15; 
+    if (keys['ArrowDown']) rocket.angle = 15; 
     if (!keys['ArrowUp'] && !keys['ArrowDown']) rocket.angle = 0;
 
     // Draw Rocket (Triangle Shape)
@@ -99,7 +111,7 @@ function gameLoop(timestamp) {
         obstacle.x += Math.sin(obstacle.y / 50) * 2; // Wavy motion for difficulty
 
         if (obstacle.y > canvas.height) obstacles.splice(index, 1);
-
+        
         // Check Collision
         if (
             rocket.x < obstacle.x + obstacle.width &&
