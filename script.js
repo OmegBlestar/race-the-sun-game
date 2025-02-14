@@ -35,13 +35,24 @@ window.addEventListener('keydown', (e) => keys[e.key] = true);
 window.addEventListener('keyup', (e) => keys[e.key] = false);
 
 // Mobile Controls for Left, Right, and Fire
-document.getElementById('leftBtn').addEventListener('click', () => keys['ArrowLeft'] = true);
-document.getElementById('rightBtn').addEventListener('click', () => keys['ArrowRight'] = true);
-document.getElementById('fireBtn').addEventListener('click', () => keys[' '] = true);
+document.getElementById('leftBtn').addEventListener('mousedown', () => keys['ArrowLeft'] = true);  // For mobile touch
+document.getElementById('rightBtn').addEventListener('mousedown', () => keys['ArrowRight'] = true); // For mobile touch
 
-document.getElementById('leftBtn').addEventListener('mouseup', () => keys['ArrowLeft'] = false);
-document.getElementById('rightBtn').addEventListener('mouseup', () => keys['ArrowRight'] = false);
+document.getElementById('leftBtn').addEventListener('mouseup', () => keys['ArrowLeft'] = false);   // Stop on touch release
+document.getElementById('rightBtn').addEventListener('mouseup', () => keys['ArrowRight'] = false);  // Stop on touch release
+
+// Prevent stopping the movement while the button is pressed
+document.getElementById('leftBtn').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+document.getElementById('rightBtn').addEventListener('touchstart', () => keys['ArrowRight'] = true);
+
+document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
+document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
+
+// Fire Button
+document.getElementById('fireBtn').addEventListener('click', () => keys[' '] = true);
 document.getElementById('fireBtn').addEventListener('mouseup', () => keys[' '] = false);
+document.getElementById('fireBtn').addEventListener('touchstart', () => keys[' '] = true);
+document.getElementById('fireBtn').addEventListener('touchend', () => keys[' '] = false);
 
 // Game Loop
 function gameLoop(timestamp) {
