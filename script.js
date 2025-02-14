@@ -49,10 +49,27 @@ document.getElementById('leftBtn').addEventListener('touchend', () => keys['Arro
 document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
 
 // Fire Button - Single Fire on Tap
+let isFiring = false; // Flag to check if firing is in progress
+
 document.getElementById('fireBtn').addEventListener('click', () => {
-    if (rocket.alive) { // Fire only if rocket is alive
+    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
+        isFiring = true; // Set firing flag
         bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
     }
+});
+
+// Mobile Fire Button - Single Fire on Tap
+document.getElementById('fireBtn').addEventListener('touchstart', () => {
+    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
+        isFiring = true; // Set firing flag
+        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
+        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
+    }
+});
+
+document.getElementById('fireBtn').addEventListener('touchend', () => {
+    isFiring = false; // Reset firing flag when touch ends
 });
 
 // Game Loop
