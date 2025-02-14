@@ -52,10 +52,9 @@ document.getElementById('rightBtn').addEventListener('touchend', () => keys['Arr
 document.getElementById('fireBtn').addEventListener('click', () => {
     const now = Date.now();
     if (now - lastFireTime >= 700) {  // 700ms cooldown before firing again
-        setTimeout(() => {
-            keys[' '] = true;
-            lastFireTime = Date.now();
-        }, 700); // Fire after 700ms
+        keys[' '] = true;
+        lastFireTime = now;
+        setTimeout(() => { keys[' '] = false; }, 100); // Disable firing after 100ms (to simulate single shot)
     }
 });
 document.getElementById('fireBtn').addEventListener('mouseup', () => {
@@ -64,10 +63,9 @@ document.getElementById('fireBtn').addEventListener('mouseup', () => {
 document.getElementById('fireBtn').addEventListener('touchstart', () => {
     const now = Date.now();
     if (now - lastFireTime >= 700) {
-        setTimeout(() => {
-            keys[' '] = true;
-            lastFireTime = Date.now();
-        }, 700); // Fire after 700ms
+        keys[' '] = true;
+        lastFireTime = now;
+        setTimeout(() => { keys[' '] = false; }, 100); // Disable firing after 100ms (to simulate single shot)
     }
 });
 document.getElementById('fireBtn').addEventListener('touchend', () => {
