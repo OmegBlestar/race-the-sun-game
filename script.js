@@ -45,14 +45,25 @@ window.addEventListener('keydown', (e) => keys[e.key] = true);
 window.addEventListener('keyup', (e) => keys[e.key] = false);
 
 // Mobile Touch Controls
+let touchStartX = 0;
+
+// Track initial touch position
 canvas.addEventListener('touchstart', (e) => {
-    let touchX = e.touches[0].clientX;
-    if (touchX < canvas.width / 2) {
-        keys['ArrowLeft'] = true;
-    } else {
-        keys['ArrowRight'] = true;
-    }
+    touchStartX = e.touches[0].clientX;
 });
+
+// Move the rocket based on finger drag
+canvas.addEventListener('touchmove', (e) => {
+    let touchX = e.touches[0].clientX;
+    let deltaX = touchX - touchStartX;
+    rocket.x += deltaX * 0.5; // Adjust sensitivity if needed
+    touchStartX = touchX; // Update for smoother movement
+
+    // Ensure rocket stays within canvas boundaries
+    if (rocket.x < 0) rocket.x = 0;
+    if (rocket.x + rocket.width > canvas.width) rocket.x = canvas.width - rocket.width;
+});
+
 
 canvas.addEventListener('touchend', () => {
     keys['ArrowLeft'] = false;
