@@ -52,17 +52,17 @@ canvas.addEventListener('touchstart', (e) => {
     touchStartX = e.touches[0].clientX;
 });
 
-// Move the rocket based on finger drag
+// Move rocket precisely with touch
 canvas.addEventListener('touchmove', (e) => {
-    let touchX = e.touches[0].clientX;
-    let deltaX = touchX - touchStartX;
-    rocket.x += deltaX * 0.5; // Adjust sensitivity if needed
-    touchStartX = touchX; // Update for smoother movement
+    e.preventDefault(); // Prevents scrolling while playing
+    let touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+    rocket.x = touchX - rocket.width / 2; // Center the rocket under the finger
 
     // Ensure rocket stays within canvas boundaries
     if (rocket.x < 0) rocket.x = 0;
     if (rocket.x + rocket.width > canvas.width) rocket.x = canvas.width - rocket.width;
-});
+}, { passive: false });
+
 
 
 canvas.addEventListener('touchend', () => {
