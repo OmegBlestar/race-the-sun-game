@@ -81,17 +81,18 @@ function gameLoop() {
     ctx.drawImage(rocketImage, rocket.x, rocket.y, rocket.width, rocket.height);
 
     // Generate Obstacles
-   // Generate Obstacles
     if (Math.random() < obstacleSpawnRate + (score * 0.0002)) {
-        let randomX = Math.random() * (canvas.width - 50);
-        
+        let margin = 20; // Distance from left and right edges
+        let randomX = margin + Math.random() * (canvas.width - 2 * margin); // Ensures obstacles don't spawn too close to edges
+
         // Increase obstacle base speed and make them faster as score increases
-        let baseSpeed = 3; // Was 2 before
-        let speedIncrease = score * 0.05; // Increases slightly with score
+        let baseSpeed = 3;
+        let speedIncrease = score * 0.05;
         let randomSpeed = baseSpeed + Math.random() * difficulty + speedIncrease;
 
         obstacles.push({ x: randomX, y: -50, radius: 25, speed: randomSpeed });
     }
+
 
 
     // Move and Draw Obstacles
