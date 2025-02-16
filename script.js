@@ -54,14 +54,16 @@ canvas.addEventListener('touchstart', (e) => {
 
 // Move rocket precisely with touch
 canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault(); // Prevents scrolling while playing
+    e.preventDefault(); // Prevents scrolling
     let touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
-    rocket.x = touchX - rocket.width / 2; // Center the rocket under the finger
+    
+    // Instantly move the rocket under the finger
+    rocket.x = touchX - rocket.width / 2;
 
     // Ensure rocket stays within canvas boundaries
-    if (rocket.x < 0) rocket.x = 0;
-    if (rocket.x + rocket.width > canvas.width) rocket.x = canvas.width - rocket.width;
+    rocket.x = Math.max(0, Math.min(canvas.width - rocket.width, rocket.x));
 }, { passive: false });
+
 
 
 
