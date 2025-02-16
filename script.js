@@ -4,167 +4,154 @@ const ctx = canvas.getContext('2d');
 canvas.width = 400;
 canvas.height = 600;
 
+// Load images
+const bgImage = new Image();
+bgImage.src = 'background.jpg'; // Ensure this file exists
+
+const obstacleImage = new Image();
+obstacleImage.src = 'obstacle.png'; // Ensure this file is in the correct location
+
+const rocketImage = new Image();
+rocketImage.src = 'rocket.png'; // Ensure this file is in the correct location
+
 // Rocket properties
+// Rocket properties (Increased size)
 let rocket = {
-    x: canvas.width / 2 - 15,
-    y: canvas.height - 100, // Moved slightly up
-    width: 30,
-    height: 40,
+    x: canvas.width / 2 - 30, // Adjusted to center properly
+    y: canvas.height - 120,
+    width: 60, // Larger width
+    height: 90, // Larger height
     speed: 5,
-    angle: 0,
     alive: true
 };
+
 
 // Obstacles and Bullets
 let obstacles = [];
 let bullets = [];
 let score = 0;
 let highScore = 0;
-let difficulty = 1; // Increases as score rises
-let lastFireTime = 0; // Tracks when the last bullet was fired
+let difficulty = 1;
+let obstacleSpawnRate = 0.01;
 
 // Controls
 let keys = {
     ArrowLeft: false,
-    ArrowRight: false,
-    " ": false // Spacebar for fire
+    ArrowRight: false
 };
 
 // Handle key presses for desktop
 window.addEventListener('keydown', (e) => keys[e.key] = true);
 window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-// Mobile Controls for Left, Right, and Fire
-document.getElementById('leftBtn').addEventListener('mousedown', () => keys['ArrowLeft'] = true);  // For mobile touch
-document.getElementById('rightBtn').addEventListener('mousedown', () => keys['ArrowRight'] = true); // For mobile touch
-
-document.getElementById('leftBtn').addEventListener('mouseup', () => keys['ArrowLeft'] = false);   // Stop on touch release
-document.getElementById('rightBtn').addEventListener('mouseup', () => keys['ArrowRight'] = false);  // Stop on touch release
-
-// Prevent stopping the movement while the button is pressed
-document.getElementById('leftBtn').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
-document.getElementById('rightBtn').addEventListener('touchstart', () => keys['ArrowRight'] = true);
-
-document.getElementById('leftBtn').addEventListener('touchend', () => keys['ArrowLeft'] = false);
-document.getElementById('rightBtn').addEventListener('touchend', () => keys['ArrowRight'] = false);
-
-// Fire Button - Single Fire on Tap
-let isFiring = false; // Flag to check if firing is in progress
-
-document.getElementById('fireBtn').addEventListener('click', () => {
-    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
-        isFiring = true; // Set firing flag
-        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
+// Mobile Touch Controls
+canvas.addEventListener('touchstart', (e) => {
+    let touchX = e.touches[0].clientX;
+    if (touchX < canvas.width / 2) {
+        keys['ArrowLeft'] = true;
+    } else {
+        keys['ArrowRight'] = true;
     }
 });
 
-// Mobile Fire Button - Single Fire on Tap
-document.getElementById('fireBtn').addEventListener('touchstart', () => {
-    if (rocket.alive && !isFiring) { // Fire only if rocket is alive and not already firing
-        isFiring = true; // Set firing flag
-        bullets.push({ x: rocket.x + rocket.width / 2 - 5, y: rocket.y, width: 10, height: 20, speed: 5 });
-        setTimeout(() => isFiring = false, 300); // Reset firing flag after 300ms (time for one shot)
-    }
+canvas.addEventListener('touchend', () => {
+    keys['ArrowLeft'] = false;
+    keys['ArrowRight'] = false;
 });
 
-document.getElementById('fireBtn').addEventListener('touchend', () => {
-    isFiring = false; // Reset firing flag when touch ends
-});
+// Automatic firing (Fire rate fixed to 0.1s)
+setInterval(() => {
+    if (rocket.alive) {
+        bullets.push({ x: rocket.x + rocket.width / 2, y: rocket.y, radius: 5, speed: 5 });
+    }
+}, 100);
 
 // Game Loop
-function gameLoop(timestamp) {
+function gameLoop() {
     if (!rocket.alive) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw Background
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 
     // Rocket Movement
     if (keys['ArrowLeft'] && rocket.x > 0) rocket.x -= rocket.speed;
     if (keys['ArrowRight'] && rocket.x + rocket.width < canvas.width) rocket.x += rocket.speed;
-    if (keys['ArrowUp']) rocket.angle = -15; 
-    if (keys['ArrowDown']) rocket.angle = 15; 
-    if (!keys['ArrowUp'] && !keys['ArrowDown']) rocket.angle = 0;
 
-    // Draw Rocket (Triangle Shape)
-    ctx.save();
-    ctx.translate(rocket.x + rocket.width / 2, rocket.y + rocket.height / 2);
-    ctx.rotate((rocket.angle * Math.PI) / 180);
-    ctx.beginPath();
-    ctx.moveTo(0, -rocket.height / 2);
-    ctx.lineTo(rocket.width / 2, rocket.height / 2);
-    ctx.lineTo(-rocket.width / 2, rocket.height / 2);
-    ctx.closePath();
-    ctx.fillStyle = "red";
-    ctx.fill();
-    ctx.restore();
+    // Draw Rocket as Image
+    ctx.drawImage(rocketImage, rocket.x, rocket.y, rocket.width, rocket.height);
 
-    // Generate Obstacles (Harder as Score Increases)
-    if (Math.random() < 0.02 + (score * 0.0005)) {
-        let randomX = Math.random() * (canvas.width - 40);
-        let randomSpeed = 3 + Math.random() * difficulty;
-        obstacles.push({ x: randomX, y: -50, width: 40, height: 50, speed: randomSpeed });
+    // Generate Obstacles
+    if (Math.random() < obstacleSpawnRate + (score * 0.0002)) {
+        let randomX = Math.random() * (canvas.width - 50);
+        let randomSpeed = 2 + Math.random() * difficulty;
+        obstacles.push({ x: randomX, y: -50, radius: 25, speed: randomSpeed });
     }
 
-    // Move Obstacles
+    // Move and Draw Obstacles
     obstacles.forEach((obstacle, index) => {
         obstacle.y += obstacle.speed;
-        obstacle.x += Math.sin(obstacle.y / 50) * 2; // Wavy motion for difficulty
-
-        if (obstacle.y > canvas.height) obstacles.splice(index, 1);
         
-        // Check Collision
-        if (
-            rocket.x < obstacle.x + obstacle.width &&
-            rocket.x + rocket.width > obstacle.x &&
-            rocket.y < obstacle.y + obstacle.height &&
-            rocket.y + rocket.height > obstacle.y
-        ) {
+        if (obstacle.y > canvas.height) {
+            rocket.alive = false;
+            document.getElementById('replayButton').style.display = 'block';
+        }
+        
+        // Check Collision with Rocket (Circular)
+        let dx = rocket.x + rocket.width / 2 - obstacle.x;
+        let dy = rocket.y + rocket.height / 2 - obstacle.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < obstacle.radius + rocket.width / 2) {
             rocket.alive = false;
             document.getElementById('replayButton').style.display = 'block';
         }
 
-        // Draw Obstacles
-        ctx.fillStyle = "blue";
-        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        // Draw Circular Obstacle with Image Filling Entire Area
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        // Ensure the image fully covers the obstacle
+        ctx.drawImage(obstacleImage, 
+            obstacle.x - obstacle.radius, obstacle.y - obstacle.radius, 
+            obstacle.radius * 2, obstacle.radius * 2
+        );
+
+        ctx.restore();
     });
 
-    // Move Bullets
+    // Move and Draw Bullets
     bullets.forEach((bullet, bulletIndex) => {
         bullet.y -= bullet.speed;
         if (bullet.y < 0) bullets.splice(bulletIndex, 1);
 
         // Check Collision with Obstacles
         obstacles.forEach((obstacle, obstacleIndex) => {
-            if (
-                bullet.x < obstacle.x + obstacle.width &&
-                bullet.x + bullet.width > obstacle.x &&
-                bullet.y < obstacle.y + obstacle.height &&
-                bullet.y + bullet.height > obstacle.y
-            ) {
+            let dx = bullet.x - obstacle.x;
+            let dy = bullet.y - obstacle.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < obstacle.radius) {
                 bullets.splice(bulletIndex, 1);
                 obstacles.splice(obstacleIndex, 1);
                 score++;
-                difficulty += 0.05; // Increase difficulty
+                difficulty += 0.02;
                 if (score > highScore) highScore = score;
             }
         });
 
-        // Draw Bullet
+        // Draw Circular Bullet
         ctx.fillStyle = "yellow";
-        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+        ctx.fill();
     });
 
     // Update Score
     document.getElementById('score').innerText = score;
     document.getElementById('highScore').innerText = highScore;
-
-    // Draw the bottom line
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - 50);
-    ctx.lineTo(canvas.width, canvas.height - 50);
-    ctx.stroke();
 
     requestAnimationFrame(gameLoop);
 }
@@ -178,9 +165,12 @@ function restartGame() {
     bullets = [];
     score = 0;
     difficulty = 1;
+    obstacleSpawnRate = 0.01;
     document.getElementById('replayButton').style.display = 'none';
-    gameLoop(0);
+    gameLoop();
 }
 
-// Start the Game
-gameLoop(0);
+// Start game after images are loaded
+rocketImage.onload = () => {
+    gameLoop();
+};
